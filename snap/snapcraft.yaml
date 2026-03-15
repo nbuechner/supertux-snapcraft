@@ -1,5 +1,11 @@
 name: supertux
-base: core20
+base: core24
+title: SuperTux
+contact: https://github.com/SuperTux/supertux/issues
+website: https://www.supertux.org
+issues: https://github.com/SuperTux/supertux/issues
+source-code: https://github.com/SuperTux/supertux
+donation: https://www.supertux.org/donate.html
 license: GPL-3.0
 adopt-info: supertux
 summary: SuperTux
@@ -9,6 +15,14 @@ description: |
     Run and jump through multiple worlds, fighting off enemies by jumping on them, bumping them from below or tossing objects at them, grabbing power-ups and other stuff on the way.
 confinement: strict
 grade: stable
+
+platforms:
+  amd64:
+    build-on: amd64
+    build-for: amd64
+  arm64:
+    build-on: arm64
+    build-for: arm64
 
 apps:
   supertux:
@@ -35,7 +49,24 @@ parts:
     # This wrapper simply calls cmake itself, but in this case,
     # we don't run into any path issues. However, we could execute
     # the cmake commands manually, but since the wrapper is already there...
-    
+
+    prime:
+      - -**/libGLU.so*
+      - -**/libGLX_mesa.so*
+      - -**/libboost_filesystem.so*
+      - -**/libboost_locale.so*
+      - -**/libboost_thread.so*
+      - -**/libdconf.so*
+      - -**/libicuio.so*
+      - -**/libicutest.so*
+      - -**/libicutu.so*
+      - -**/libpulse-simple.so*
+      - -**/libunity-extras.so*
+      - -**/libvulkan.so*
+      - -**/libOpenGL.so*
+      - -**/libXxf86vm.so*
+      - -**/libxcb-glx.so*
+
     plugin: nil
     after: [desktop-glib-only]
     source: https://github.com/supertux/supertux.git
@@ -48,15 +79,15 @@ parts:
       if [ "${trimmed_tag}" != "${last_released_tag}" ]; then
         git fetch
         git checkout "${last_committed_tag}"
-        snapcraftctl set-version $(git -C ../src describe --tags `git rev-list --tags --max-count=1` | sed 's/desc\///' | sed 's/git//' | sed 's/^v//')
+        craftctl set version=$(git -C ../src describe --tags `git rev-list --tags --max-count=1` | sed 's/desc\///' | sed 's/git//' | sed 's/^v//')
       else
-        snapcraftctl set-version $(git describe --tags)
+        craftctl set version=$(git describe --tags)
       fi
       ./configure -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL/usr/
       cd build
       make -j$(nproc)
       make install
-      snapcraftctl build
+      craftctl default
 
     build-packages:
       - g++
@@ -68,10 +99,10 @@ parts:
       - libvorbis-dev
       - libopenal-dev
       - libglew-dev
-      - libboost-date-time-dev
-      - libboost-filesystem-dev
-      - libboost-locale-dev
-      - libboost-system-dev
+      - libboost-date-time1.83-dev
+      - libboost-filesystem1.83-dev
+      - libboost-locale1.83-dev
+      - libboost-system1.83-dev
       - libcurl4-openssl-dev
       - libfreetype6-dev
       - libraqm-dev
@@ -79,16 +110,19 @@ parts:
       - libphysfs-dev
       - libharfbuzz-dev
       - libglm-dev
+      - pkg-config
+      - libfmt-dev
     stage-packages:
+      - libfmt9
       - libstdc++6
       - libgl1-mesa-dri
-      - libgl1-mesa-glx
+      - libglx-mesa0
       - libglu1-mesa
       - libwayland-egl1-mesa
       - libsdl2-2.0-0
       - libsdl2-image-2.0-0
       - libopenal1
-      - libglew2.1
+      - libglew2.2
       - libvorbis0a
       - libvorbisfile3
       - libdbusmenu-glib4
@@ -99,10 +133,10 @@ parts:
       - libraqm0
       - libfribidi0
       - libphysfs1
-      - libboost-filesystem1.71.0
-      - libboost-locale1.71.0
-      - libboost-system1.71.0
-      - libboost-thread1.71.0
+      - libboost-filesystem1.83.0
+      - libboost-locale1.83.0
+      - libboost-system1.83.0
+      - libboost-thread1.83.0
       - locales-all
       - libharfbuzz-bin
 
